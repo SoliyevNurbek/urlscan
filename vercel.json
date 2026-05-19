@@ -1,12 +1,12 @@
 {
   "version": 2,
   "buildCommand": "echo 'Build complete'",
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key"
-  },
+  "installCommand": "npm install",
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs18.x",
+      "memory": 1024,
+      "maxDuration": 60
     }
   },
   "routes": [
@@ -18,10 +18,6 @@
     {
       "src": "/(.*)",
       "dest": "/cyberscan-pro/public/$1"
-    }
-  ]
-}
-
     }
   ]
 }
