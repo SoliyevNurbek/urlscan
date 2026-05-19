@@ -1,23 +1,27 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
+  "buildCommand": "echo 'Build complete'",
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key"
+  },
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/$1",
+      "methods": ["POST", "GET", "OPTIONS"]
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/cyberscan-pro/public/$1"
+    }
+  ]
+}
+
     }
   ]
 }

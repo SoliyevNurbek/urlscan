@@ -1,103 +1,154 @@
-# 🔐 CyberScan Pro
+# 🔐 CyberScan Pro v1.0.1
 
-**20+ xavfsizlik skaneri · Real vaqt · Chuqur tahlil**
+**20+ Xavfsizlik Skaneri · Real Vaqt · Chuqur Tahlil**
 
 Domeningizni malware, SSL, DNS, HTTP sarlavhalar, CVE va boshqa 20+ tekshiruvdan o'tkazing.
 
----
+## 🌟 Xususiyatlari
 
-## 📁 Loyiha tuzilmasi
+- ✅ **20+ Xavfsizlik Skaneri**: Malware, SSL/TLS, DNS, HTTP Headers, CVE, Privacy
+- ⚡ **Real Vaqt Tekshiruvi**: Parametrik tahlil va o'zidan vaqtida natijalar
+- 🌐 **Cloud-Native**: Vercel serverless orqali ishlaydi
+- 🎯 **Batafsil Hisobotlar**: JSON va Telegram formatida export
+- 🇺🇿 **Uzbek Tili**: To'lik Uzbek tilida interfeys
+
+## 📁 Loyiha Tuzilmasi
 
 ```
-cyberscan-pro/
+urlscan/
 ├── api/
-│   └── scan.js          # Vercel serverless function (API proxy)
-├── public/
-│   └── index.html       # Asosiy frontend
-├── vercel.json          # Vercel konfiguratsiyasi
+│   └── scan.js              # Vercel Serverless API (Claude web search)
+├── cyberscan-pro/
+│   ├── public/
+│   │   └── index.html       # Frontend (Uzbek tilida)
+│   └── vercel.json
+├── package.json             # Dependencies
+├── vercel.json              # Root Vercel config
+├── .env.example             # Environment variables template
+├── .gitignore
 └── README.md
 ```
 
----
+## 🛠️ Lokal Sozlash
 
-## 🚀 Vercel'ga yuklash (qadam-baqadam)
+### Talablar
+- Node.js 18+
+- npm yoki yarn
+- Anthropic API key ([anthropic.com](https://console.anthropic.com))
 
-### 1. GitHub repozitoriy yarating
+### Bosqichlar
+
+1. **Repozitoriy klonlang**
+```bash
+git clone https://github.com/your-username/urlscan.git
+cd urlscan
+```
+
+2. **Dependencies o'rnatish**
+```bash
+npm install
+```
+
+3. **.env.local faylini yarating**
+```bash
+cp .env.example .env.local
+```
+
+4. **API kalitini qo'shing** (faylda: .env.local)
+```
+ANTHROPIC_API_KEY=sk_xxxxxxxxxxxxxxx
+```
+
+## 🚀 Vercel'ga Deployment
+
+### 1. GitHub'ga Push Qiling
 
 ```bash
-git init
 git add .
-git commit -m "Initial commit: CyberScan Pro v2.0"
+git commit -m "URL scanner 1.0.1"
 git branch -M main
-git remote add origin https://github.com/SIZNING_USERNAME/cyberscan-pro.git
+git remote add origin https://github.com/YOUR_USERNAME/urlscan.git
 git push -u origin main
 ```
 
-### 2. Vercel'da deploy qiling
+### 2. Vercel'da Loyiha Yarating
 
-1. [vercel.com](https://vercel.com) ga boring va GitHub bilan kiring
-2. **"Add New Project"** tugmasini bosing
-3. GitHub repozitoriyingizni tanlang (`cyberscan-pro`)
-4. **Framework Preset**: `Other` tanlang
-5. **Root Directory**: `.` (o'zgartirmang)
-6. **"Deploy"** tugmasini bosing
+1. [vercel.com](https://vercel.com) ga kiring
+2. **New Project** bosing
+3. GitHub repozitoriyni tanlang
+4. **Deploy** bosing
 
-### 3. Anthropic API kalitini qo'shing ⚠️ MUHIM
+### 3. Environment Variables Qo'shing ⚠️ MUHIM
 
-Vercel dashboard → Loyihangiz → **Settings** → **Environment Variables**
+Vercel Dashboard → Settings → Environment Variables
 
-| Name | Value |
-|------|-------|
-| `ANTHROPIC_API_KEY` | `sk-ant-api03-...` |
+```
+ANTHROPIC_API_KEY = sk_xxxxxxxxxxxxxxx
+```
 
-Kalitni qo'shgandan so'ng **"Redeploy"** qiling.
+Kalitni qo'shgandan so'ng **Redeploy** qiling!
+
+## 📊 Tekshiruv Modullar (20 ta)
+
+### 🦠 Malware & Blacklist (4 ta)
+- Sucuri SiteCheck - Malware va firewall tekshiruvi
+- VirusTotal - 90+ antivirus motor
+- Google Safe Browsing - Google blacklist
+- PhishTank - Phishing URL ma'lumotlar bazasi
+
+### 🔒 SSL/TLS Xavfsizligi (3 ta)
+- SSL Labs - Sertifikat kalitesi
+- Certificate Transparency - crt.sh
+- HSTS Preload - HSTS konfiguratsiyasi
+
+### 🔑 HTTP Xavfsizlik Sarlavhalari (3 ta)
+- Mozilla Observatory - HTTP headers bahosi
+- Security Headers - Sarlavhalar audit
+- CSP Evaluator - Content Security Policy
+
+### 🌍 DNS & Infratuzilma (3 ta)
+- HackerTarget - Port skaneri
+- DNSSEC Checker - DNS xavfsizligi
+- Shodan - Open ports va xizmatlar
+
+### ⚙️ Texnologiya & Zaifliklar (4 ta)
+- Wappalyzer - Tech stack deteksiya
+- Retire.js - Zaif JS kutubxonalari
+- CVE Database - NVD ma'lumotlar bazasi
+- Wayback Machine - Tarixiy ma'lumot sizishi
+
+### 🔏 Ma'lumot Sizishi & Privacy (3 ta)
+- HaveIBeenPwned - Breach tekshiruvi
+- urlscan.io - URL xatti-harakati
+- Privacy Grade - GDPR muvofiqlik
+
+## 🔐 API Endpoint
+
+```
+POST /api/scan
+Content-Type: application/json
+
+{
+  "domain": "example.uz",
+  "serviceId": "sucuri"  # (opsional - bitta servis uchun)
+}
+```
+
+## 🐛 Muammolarni Tuzatish
+
+### "API key not configured" xatosi
+**Yechim**: Vercel Settings → Environment Variables → ANTHROPIC_API_KEY qo'shing
+
+### "Network xatosi"
+**Yechim**: Brauzer konsolida xatoni ko'ring (F12) va Vercel logslarini tekshiring
+
+## 📝 Lisenziya
+
+MIT License
 
 ---
 
-## 🌐 Custom domen ulash (subdomen)
-
-Vercel dashboard → Loyihangiz → **Settings** → **Domains**
-
-**"Add Domain"** tugmasini bosib subdomeningizni kiriting:
-```
-scan.sizningdomen.uz
-```
-
-Keyin domen provayderingizda (Namecheap, GoDaddy va h.k.) DNS yozing:
-
-```
-Type: CNAME
-Name: scan
-Value: cname.vercel-dns.com
-TTL:  Auto
-```
-
-> **Eslatma**: DNS tarqalishi 5-30 daqiqa oladi.
-
----
-
-## 🔑 Anthropic API kalitini olish
-
-1. [console.anthropic.com](https://console.anthropic.com) ga boring
-2. **API Keys** → **Create Key**
-3. Kalitni nusxa oling (`sk-ant-api03-...`)
-4. Vercel Environment Variables-ga joylashtiring
-
----
-
-## ⚙️ Texnik tafsilotlar
-
-- **Frontend**: Vanilla HTML/CSS/JS (hech qanday framework kerak emas)
-- **Backend**: Vercel Serverless Function (Node.js)
-- **AI Model**: Claude Sonnet 4 (web search bilan)
-- **Tekshiruvlar**: 20 ta parallel API chaqiruvi
-
----
-
-## 🔒 Xavfsizlik
-
-- API kaliti **faqat serverda** saqlanadi (frontend-da ko'rinmaydi)
-- Barcha so'rovlar `/api/scan` orqali o'tadi
+**CyberScan Pro v1.0.1** | Xavfsizlik uchun samarali vosita! 🔐
 - CORS himoyasi yoqilgan
 
 ---

@@ -1,0 +1,26 @@
+{
+  "name": "cyberscan-pro",
+  "version": "1.0.1",
+  "description": "Professional security audit scanner with 20+ real-time checks",
+  "main": "api/scan.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch api/scan.js",
+    "build": "echo 'Vercel build configured'",
+    "start": "node api/scan.js"
+  },
+  "keywords": [
+    "security",
+    "scanner",
+    "audit",
+    "vulnerability"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

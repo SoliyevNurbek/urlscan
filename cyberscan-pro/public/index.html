@@ -338,6 +338,70 @@ function showError(msg){
   setTimeout(()=>el.classList.remove('show'), 8000);
 }
 
+async function executeScansWithConcurrency(services, domain, maxConcurrent) {
+  const results = new Array(services.length).fill(null);
+  const queue = services.map((svc, i) => ({ service: svc, index: i }));
+  let running = 0;
+  let queueIndex = 0;
+
+  return new Promise((resolve) => {
+    const processNext = async () => {
+      if (queueIndex >= queue.length && running === 0) {
+        resolve(results);
+        return;
+      }
+
+      if (running < maxConcurrent && queueIndex < queue.length) {
+        running++;
+        const { service, index } = queue[queueIndex++];
+        const dotEl = dotEls[index];
+
+        try {
+          if (dotEl) dotEl.className = 'prog-dot running';
+          
+          const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              domain: domain,
+              serviceId: service.id
+            })
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({ error: 'Network xatosi' }));
+            throw new Error(err.error?.message || err.error || `HTTP ${response.status}`);
+          }
+
+          const d = await response.json();
+          results[index] = d.data || { note: 'Ma\'lumot topilmadi' };
+          updateCard(service, 'done', results[index]);
+          if (dotEl) dotEl.className = 'prog-dot ok';
+        } catch (e) {
+          results[index] = { error: e.message, note: 'Xato: ' + e.message };
+          updateCard(service, 'done', results[index]);
+          if (dotEl) dotEl.className = 'prog-dot bad';
+          if (e.message.includes('API key')) {
+            showError('⚠️ API kaliti sozlanmagan. Vercel → Settings → Environment Variables → ANTHROPIC_API_KEY qo\'shing.');
+          }
+        }
+
+        updateProgress();
+        running--;
+        setTimeout(processNext, 100);
+      } else if (queueIndex < queue.length) {
+        setTimeout(processNext, 100);
+      } else if (running > 0) {
+        setTimeout(processNext, 100);
+      }
+    };
+
+    for (let i = 0; i < maxConcurrent && i < queue.length; i++) {
+      processNext();
+    }
+  });
+}
+
 async function callClaude(prompt){
   const response = await fetch(API_ENDPOINT, {
     method: 'POST',
@@ -760,22 +824,18 @@ async function startScan(){
   buildExtLinks();
   SERVICES.forEach(svc=>updateCard(svc,'loading',null));
 
-  await Promise.all(SERVICES.map(async (svc,i)=>{
-    if(dotEls[i]) dotEls[i].className='prog-dot running';
-    try{
-      const d=await callClaude(svc.prompt(domain));
-      results[svc.id]=d;
-      updateCard(svc,'done',d);
-      if(dotEls[i]) dotEls[i].className='prog-dot ok';
-    }catch(e){
-      results[svc.id]={note:'Xato: '+e.message};
-      updateCard(svc,'done',results[svc.id]);
-      if(dotEls[i]) dotEls[i].className='prog-dot bad';
-      if(e.message.includes('API key')) showError('⚠️ API kaliti sozlanmagan. Vercel dashboard → Settings → Environment Variables → ANTHROPIC_API_KEY qo\'shing.');
-    }
-    updateProgress();
-    if(done===SERVICES.length) updateSummary();
-  }));
+  // Execute scans with controlled concurrency
+  const scanResults = await executeScansWithConcurrency(SERVICES, domain, 3);
+  
+  for(let i=0; i<SERVICES.length; i++){
+    const svc = SERVICES[i];
+    const d = scanResults[i];
+    results[svc.id] = d;
+    updateCard(svc, 'done', d);
+    if(dotEls[i]) dotEls[i].className = d.error ? 'prog-dot bad' : 'prog-dot ok';
+  }
+  
+  updateSummary();
 
   document.getElementById('scanBtn').disabled=false;
   document.getElementById('scanBtn').textContent='▶ SCAN';
