@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'API key not configured' });
   }
@@ -58,36 +58,37 @@ function normalizeDomain(url) {
   }
 }
 
-async function callClaude(prompt, apiKey) {
+async function callGemini(prompt, apiKey) {
   const maxRetries = 3;
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-20250305',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1500,
-          tools: [
-            {
-              type: 'web_search_20250305',
-              name: 'web_search',
-            },
-          ],
-          system: 'You are a professional cybersecurity scanner. Use web search to find REAL current security data. Return ONLY raw JSON object (no markdown, no backticks, no explanation). Format: {"field":"value","note":"Uzbek tilida"}',
-          messages: [
+          systemInstruction: {
+            parts: [
+              {
+                text: 'You are a professional cybersecurity scanner. Use Google Search to find REAL current security data. Return ONLY raw JSON object (no markdown, no backticks, no explanation). Format: {"field":"value","note":"Uzbek tilida"}',
+              }
+            ]
+          },
+          contents: [
             {
               role: 'user',
-              content: prompt,
+              parts: [{ text: prompt }],
             },
           ],
+          tools: [
+            { googleSearch: {} }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+          }
         }),
       });
 
@@ -102,19 +103,14 @@ async function callClaude(prompt, apiKey) {
         throw lastError;
       }
 
-      const textBlocks = (data.content || []).filter((b) => b.type === 'text');
-      if (textBlocks.length === 0) {
+      const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!txt) {
         throw new Error('No text response from API');
       }
 
-      const txt = textBlocks.map((b) => b.text).join('');
-      const jsonMatch = txt.match(/\{[\s\S]*\}/);
-
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]);
+      // Gemini with application/json might return just the JSON or wrap it in some cases, 
+      // but responseMimeType enforces strict JSON.
+      const parsed = JSON.parse(txt);
       return parsed;
     } catch (error) {
       lastError = error;
@@ -281,7 +277,7 @@ async function scanService(domain, serviceId, apiKey) {
     throw new Error(`Service ${serviceId} not found`);
   }
 
-  const result = await callClaude(service.prompt(domain), apiKey);
+  const result = await callGemini(service.prompt(domain), apiKey);
   return { serviceId, data: result };
 }
 
@@ -290,7 +286,7 @@ async function fullScan(domain, apiKey) {
 
   const promises = SERVICES.map(async (service) => {
     try {
-      const data = await callClaude(service.prompt(domain), apiKey);
+      const data = await callGemini(service.prompt(domain), apiKey);
       results[service.id] = data;
     } catch (error) {
       results[service.id] = {

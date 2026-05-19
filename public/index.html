@@ -382,7 +382,7 @@ async function executeScansWithConcurrency(services, domain, maxConcurrent) {
           updateCard(service, 'done', results[index]);
           if (dotEl) dotEl.className = 'prog-dot bad';
           if (e.message.includes('API key')) {
-            showError('⚠️ API kaliti sozlanmagan. Vercel → Settings → Environment Variables → ANTHROPIC_API_KEY qo\'shing.');
+            showError('⚠️ API kaliti sozlanmagan. Vercel → Settings → Environment Variables → GEMINI_API_KEY qo\'shing.');
           }
         }
 
@@ -402,30 +402,7 @@ async function executeScansWithConcurrency(services, domain, maxConcurrent) {
   });
 }
 
-async function callClaude(prompt){
-  const response = await fetch(API_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1200,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      system: 'You are a professional cybersecurity scanner. Use web search to find REAL current security data for the given domain. Return ONLY a raw JSON object, no markdown, no backticks, no explanation whatsoever. Just the JSON.',
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
 
-  if (!response.ok) {
-    const err = await response.json().catch(()=>({error:'Network xatosi'}));
-    throw new Error(err.error?.message || err.error || `HTTP ${response.status}`);
-  }
-
-  const d = await response.json();
-  const txt = (d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-  const m = txt.match(/\{[\s\S]*\}/);
-  if(m){ try{ return JSON.parse(m[0]); }catch{} }
-  return { note: 'Parse xatosi yoki ma\'lumot topilmadi' };
-}
 
 function gradeClass(g){
   if(!g) return '';
