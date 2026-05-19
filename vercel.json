@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "echo 'Build complete'",
   "installCommand": "npm install",
-  "outputDirectory": "cyberscan-pro/public",
+  "outputDirectory": "public",
   "routes": [
     {
       "src": "/api/(.*)",
@@ -11,7 +11,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/cyberscan-pro/public/$1"
+      "dest": "/$1"
     }
   ]
 }
