@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberScan Pro — To'liq Xavfsizlik Audit</title>
+<meta name="description" content="20+ xavfsizlik skaneri bilan domeningizni real vaqtda tekshiring. Malware, SSL, DNS, Privacy va boshqa ko'plab tekshiruvlar.">
+<meta property="og:title" content="CyberScan Pro — To'liq Xavfsizlik Audit">
+<meta property="og:description" content="20+ xavfsizlik skaneri · real vaqt · chuqur tahlil">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050608;
+  --s1:#0b0d12;
+  --s2:#10131a;
+  --s3:#161922;
+  --bd:#1c2030;
+  --bd2:#242838;
+  --tx:#dde2f0;
+  --muted:#4a5168;
+  --dim:#2a3048;
+  --c1:#00ffcc;
+  --c2:#ff3c78;
+  --c3:#7c6dfa;
+  --c4:#f5a623;
+  --c5:#00b4ff;
+  --ok:#00e896;
+  --warn:#f5a623;
+  --bad:#ff3c78;
+  --mono:'Space Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.6}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,204,0.015) 2px,rgba(0,255,204,0.015) 4px);pointer-events:none;z-index:0}
+
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.2rem;position:relative;z-index:1}
+
+.hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--bd)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--c1);background:rgba(0,255,204,0.07);border:1px solid rgba(0,255,204,0.2);padding:4px 10px;border-radius:3px;margin-bottom:12px}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c1);animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+h1{font-family:var(--display);font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1;letter-spacing:-2px}
+h1 span{color:var(--c1)}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px}
+.hdr-right{text-align:right;font-size:10px;color:var(--muted);letter-spacing:1px}
+.hdr-right strong{display:block;font-size:22px;font-family:var(--display);color:var(--c3);font-weight:700;letter-spacing:-1px}
+
+.input-section{margin-bottom:2rem}
+.input-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.input-row{display:flex;gap:10px;align-items:stretch}
+.url-wrap{flex:1;position:relative;background:var(--s1);border:1px solid var(--bd2);border-radius:6px;display:flex;align-items:center;overflow:hidden;transition:border-color 0.2s}
+.url-wrap:focus-within{border-color:var(--c1);box-shadow:0 0 0 1px rgba(0,255,204,0.15)}
+.url-prefix{padding:0 14px;color:var(--muted);font-size:13px;white-space:nowrap;border-right:1px solid var(--bd2)}
+.url-input{flex:1;background:transparent;border:none;outline:none;color:var(--tx);font-family:var(--mono);font-size:14px;padding:14px 16px}
+.url-input::placeholder{color:var(--muted)}
+.scan-btn{background:var(--c1);color:#050608;border:none;padding:0 28px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s;white-space:nowrap;text-transform:uppercase}
+.scan-btn:hover:not(:disabled){background:#33ffda;transform:translateY(-1px)}
+.scan-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+.progress-section{display:none;margin-bottom:2rem}
+.progress-section.show{display:block}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}
+.prog-meta strong{color:var(--c1)}
+.prog-outer{height:2px;background:var(--bd);border-radius:1px;overflow:hidden;margin-bottom:4px}
+.prog-inner{height:100%;background:linear-gradient(90deg,var(--c3),var(--c1));border-radius:1px;transition:width 0.5s ease;width:0}
+.prog-checks{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.prog-dot{width:6px;height:6px;border-radius:50%;background:var(--bd2);transition:background 0.3s;flex-shrink:0}
+.prog-dot.ok{background:var(--ok)}
+.prog-dot.bad{background:var(--bad)}
+.prog-dot.running{background:var(--c3);animation:blink 0.8s infinite}
+
+.summary-bar{display:none;padding:16px 20px;border-radius:8px;margin-bottom:2rem;font-size:13px;align-items:center;gap:12px;border:1px solid}
+.summary-bar.show{display:flex}
+.summary-bar.ok{background:rgba(0,232,150,0.06);border-color:rgba(0,232,150,0.2);color:var(--ok)}
+.summary-bar.warn{background:rgba(245,166,35,0.06);border-color:rgba(245,166,35,0.2);color:var(--warn)}
+.summary-bar.bad{background:rgba(255,60,120,0.06);border-color:rgba(255,60,120,0.2);color:var(--bad)}
+.sum-icon{font-size:20px;flex-shrink:0}
+.sum-text{}
+.sum-score{margin-left:auto;font-family:var(--display);font-size:24px;font-weight:800}
+
+.sec-head{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-head::after{content:'';flex:1;height:1px;background:var(--bd)}
+.sec-tag{background:var(--s3);border:1px solid var(--bd2);padding:2px 8px;border-radius:3px;font-size:10px;color:var(--dim)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px;margin-bottom:2rem}
+
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:8px;overflow:hidden;transition:border-color 0.3s,transform 0.2s}
+.card:hover{transform:translateY(-2px)}
+.card.state-ok{border-color:rgba(0,232,150,0.25)}
+.card.state-warn{border-color:rgba(245,166,35,0.25)}
+.card.state-bad{border-color:rgba(255,60,120,0.25)}
+.card.state-loading{opacity:0.7}
+
+.card-top{padding:14px 16px 0;display:flex;align-items:flex-start;gap:12px}
+.card-emoji{width:36px;height:36px;background:var(--s3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid var(--bd2)}
+.card-info{flex:1;min-width:0}
+.card-title{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:-0.3px}
+.card-desc{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.5px}
+.card-badge{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:700;white-space:nowrap;font-family:var(--display)}
+.badge-ok{background:rgba(0,232,150,0.12);color:var(--ok)}
+.badge-warn{background:rgba(245,166,35,0.12);color:var(--warn)}
+.badge-bad{background:rgba(255,60,120,0.12);color:var(--bad)}
+.badge-loading{background:var(--s3);color:var(--muted)}
+
+.card-rows{padding:12px 16px;display:flex;flex-direction:column;gap:0}
+.row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--bd);font-size:11px;gap:8px}
+.row:first-child{border-top:none;padding-top:0}
+.row-key{color:var(--muted);white-space:nowrap}
+.row-val{color:var(--tx);text-align:right;word-break:break-word}
+.ok{color:var(--ok)}
+.warn{color:var(--warn)}
+.bad{color:var(--bad)}
+.neutral{color:var(--tx)}
+.dim{color:var(--muted)}
+
+.card-note{padding:10px 16px;font-size:10px;color:var(--muted);font-family:var(--display);font-style:italic;border-top:1px solid var(--bd);line-height:1.6;background:rgba(0,0,0,0.2)}
+
+.grade-pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;font-family:var(--display)}
+.gA{background:rgba(0,232,150,0.15);color:var(--ok)}
+.gB{background:rgba(0,180,255,0.15);color:var(--c5)}
+.gC{background:rgba(245,166,35,0.15);color:var(--warn)}
+.gD,.gF{background:rgba(255,60,120,0.15);color:var(--bad)}
+
+.spin{width:12px;height:12px;border:2px solid var(--bd2);border-top-color:var(--c1);border-radius:50%;animation:rot 0.6s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+.ext-links{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:2rem}
+.ext-links a{font-size:10px;letter-spacing:0.5px;color:var(--muted);border:1px solid var(--bd);background:var(--s1);padding:5px 10px;border-radius:4px;text-decoration:none;transition:all 0.15s}
+.ext-links a:hover{color:var(--c1);border-color:var(--c1)}
+
+.report-wrap{display:none;margin-bottom:2rem}
+.report-wrap.show{display:block}
+.report-box{background:var(--s1);border:1px solid var(--bd2);border-radius:8px;padding:1.2rem;font-size:11px;line-height:2;color:var(--tx);white-space:pre-wrap;word-break:break-word;max-height:500px;overflow-y:auto}
+.report-box::-webkit-scrollbar{width:4px}
+.report-box::-webkit-scrollbar-track{background:var(--s1)}
+.report-box::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.report-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.report-btn{flex:1;min-width:120px;padding:10px;font-size:11px;cursor:pointer;font-family:var(--mono);background:var(--s2);color:var(--tx);border:1px solid var(--bd2);border-radius:6px;transition:all 0.15s;letter-spacing:0.5px}
+.report-btn:hover{background:var(--s3);border-color:var(--c1);color:var(--c1)}
+
+.vuln-section{display:none;margin-bottom:2rem}
+.vuln-section.show{display:block}
+.vuln-list{display:flex;flex-direction:column;gap:8px}
+.vuln-item{display:flex;gap:12px;align-items:flex-start;background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:12px 16px}
+.vuln-item.crit{border-color:rgba(255,60,120,0.35);background:rgba(255,60,120,0.04)}
+.vuln-item.high{border-color:rgba(245,166,35,0.35);background:rgba(245,166,35,0.04)}
+.vuln-item.info{border-color:rgba(0,180,255,0.25)}
+.vuln-sev{font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 7px;border-radius:3px;flex-shrink:0;margin-top:1px;font-family:var(--display)}
+.sev-crit{background:rgba(255,60,120,0.2);color:var(--bad)}
+.sev-high{background:rgba(245,166,35,0.2);color:var(--warn)}
+.sev-info{background:rgba(0,180,255,0.15);color:var(--c5)}
+.vuln-body{}
+.vuln-title{font-size:12px;font-family:var(--display);font-weight:700;margin-bottom:3px}
+.vuln-detail{font-size:10px;color:var(--muted);line-height:1.7}
+
+/* Error banner */
+.error-banner{display:none;padding:12px 16px;background:rgba(255,60,120,0.08);border:1px solid rgba(255,60,120,0.3);border-radius:6px;color:var(--bad);font-size:11px;margin-bottom:1rem}
+.error-banner.show{display:block}
+
+@media(max-width:600px){
+  .hdr{flex-direction:column;gap:1rem;align-items:flex-start}
+  .input-row{flex-direction:column}
+  .scan-btn{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="badge">● LIVE SCAN</div>
+    <h1>CYBER<span>SCAN</span><br>PRO</h1>
+    <div class="hdr-sub">// 20+ xavfsizlik skaneri · real vaqt · chuqur tahlil</div>
+  </div>
+  <div class="hdr-right">
+    <strong>v2.0</strong>
+    PROFESSIONAL<br>SECURITY AUDIT
+  </div>
+</div>
+
+<div class="error-banner" id="errorBanner"></div>
+
+<div class="input-section">
+  <div class="input-label">// Tekshiriladigan URL yoki domen</div>
+  <div class="input-row">
+    <div class="url-wrap">
+      <div class="url-prefix">TARGET →</div>
+      <input class="url-input" id="urlInput" type="text" placeholder="example.uz yoki https://app.example.com/path" autocomplete="off" spellcheck="false" />
+    </div>
+    <button class="scan-btn" id="scanBtn" onclick="startScan()">▶ SCAN</button>
+  </div>
+</div>
+
+<div class="progress-section" id="progWrap">
+  <div class="prog-meta">
+    <span>Tekshirilmoqda: <strong id="progDomain"></strong></span>
+    <span id="progText">0 / 20 modul</span>
+  </div>
+  <div class="prog-outer"><div class="prog-inner" id="progBar"></div></div>
+  <div class="prog-checks" id="progDots"></div>
+</div>
+
+<div class="summary-bar" id="summaryBar">
+  <div class="sum-icon" id="sumIcon"></div>
+  <div class="sum-text" id="sumText"></div>
+  <div class="sum-score" id="sumScore"></div>
+</div>
+
+<div class="vuln-section" id="vulnSection">
+  <div class="sec-head">Aniqlangan zaifliklar <span class="sec-tag" id="vulnCount">0 ta</span></div>
+  <div class="vuln-list" id="vulnList"></div>
+</div>
+
+<div id="mainCards" style="display:none">
+  <div class="sec-head">Malware & Blacklist tekshiruvlari <span class="sec-tag">4 ta</span></div>
+  <div class="cards" id="sec-malware"></div>
+
+  <div class="sec-head">SSL/TLS & Kriptografiya <span class="sec-tag">3 ta</span></div>
+  <div class="cards" id="sec-ssl"></div>
+
+  <div class="sec-head">HTTP Sarlavhalar & Konfiguratsiya <span class="sec-tag">3 ta</span></div>
+  <div class="cards" id="sec-headers"></div>
+
+  <div class="sec-head">DNS & Infratuzilma <span class="sec-tag">3 ta</span></div>
+  <div class="cards" id="sec-infra"></div>
+
+  <div class="sec-head">Texnologiya & Zaiflik tekshiruvi <span class="sec-tag">4 ta</span></div>
+  <div class="cards" id="sec-tech"></div>
+
+  <div class="sec-head">Ma'lumot sizishi & Privacy <span class="sec-tag">3 ta</span></div>
+  <div class="cards" id="sec-privacy"></div>
+</div>
+
+<div class="ext-links" id="extLinks" style="display:none"></div>
+
+<div class="report-wrap" id="reportWrap">
+  <div class="sec-head">To'liq tekshiruv hisoboti</div>
+  <div class="report-box" id="reportBox"></div>
+  <div class="report-actions">
+    <button class="report-btn" onclick="copyReport()">📋 Nusxa olish</button>
+    <button class="report-btn" onclick="downloadReport()">⬇ .txt yuklab olish</button>
+    <button class="report-btn" onclick="copyTelegram()">✈ Telegram post</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ── API endpoint: Vercel serverless function ──────────────────────────────
+const API_ENDPOINT = '/api/scan';
+
+const SERVICES = [
+  {id:'sucuri',   sec:'malware', name:'Sucuri SiteCheck',    icon:'🛡', desc:'Malware, blacklist, spam skaneri',
+   prompt:d=>`Search the web RIGHT NOW for Sucuri SiteCheck results for domain "${d}". Fetch https://sitecheck.sucuri.net/results/${d} or search "sucuri sitecheck ${d} results malware clean". Return ONLY raw JSON (no markdown): {"malware":"clean","blacklist":"clean","spam":"clean","website_firewall":false,"outdated_software":false,"blacklisted_by":[],"overall":"clean","note":"Uzbek tilida bir jumlali tavsif"}`},
+
+  {id:'virustotal',sec:'malware',name:'VirusTotal',           icon:'🦠', desc:'90+ antivirus + community',
+   prompt:d=>`Search virustotal.com for domain "${d}". Fetch https://www.virustotal.com/gui/domain/${d} or search "virustotal domain ${d} malicious". Return ONLY JSON: {"clean":true,"malicious":0,"suspicious":0,"undetected":72,"harmless":18,"total":90,"community_score":0,"categories":[],"note":"Uzbek tilida"}`},
+
+  {id:'google',   sec:'malware', name:'Google Safe Browsing', icon:'🌐', desc:'Google xavf ro\'yxati',
+   prompt:d=>`Check Google Safe Browsing for "${d}" at https://transparencyreport.google.com/safe-browsing/search?url=${d} or search "google safe browsing ${d} site:transparencyreport.google.com". Return ONLY JSON: {"safe":true,"threats":[],"last_checked":"recent","note":"Uzbek tilida"}`},
+
+  {id:'phishtank', sec:'malware', name:'PhishTank',           icon:'🎣', desc:'Phishing URL ma\'lumotlar bazasi',
+   prompt:d=>`Search phishtank.com for phishing records of "${d}". Try https://www.phishtank.com/check_phish.php?url=${d} or search "phishtank ${d}". Return ONLY JSON: {"in_database":false,"verified":false,"valid":false,"phish_id":null,"note":"Uzbek tilida"}`},
+
+  {id:'ssllabs',  sec:'ssl',     name:'SSL Labs',             icon:'🔒', desc:'SSL/TLS sertifikat sifati',
+   prompt:d=>`Search for SSL Labs grade for "${d}" at https://www.ssllabs.com/ssltest/analyze.html?d=${d} or search "ssllabs test ${d} grade A B C". Return ONLY JSON: {"grade":"A","tls13":true,"tls12":true,"tls11":false,"tls10":false,"forward_secrecy":true,"pqc":false,"heartbleed":false,"poodle":false,"beast":false,"robot":false,"cert_valid":true,"cert_expiry_days":200,"hsts":true,"note":"Uzbek tilida"}`},
+
+  {id:'crtsh',    sec:'ssl',     name:'crt.sh (Certificate Transparency)', icon:'📜', desc:'SSL sertifikat shaffoflik jurnali',
+   prompt:d=>`Search crt.sh for certificates issued for "${d}". Fetch https://crt.sh/?q=${d} or search "crt.sh ${d} certificate". Return ONLY JSON: {"total_certs":5,"latest_issuer":"Let's Encrypt","wildcard_certs":0,"expired_certs":0,"subdomains_found":["www.${d}"],"note":"Uzbek tilida"}`},
+
+  {id:'hstscheck', sec:'ssl',    name:'HSTS Preload',         icon:'🔐', desc:'HSTS preload ro\'yxati tekshiruvi',
+   prompt:d=>`Check if "${d}" is in HSTS preload list at https://hstspreload.org/?domain=${d} or search "hsts preload ${d}". Return ONLY JSON: {"preloaded":false,"eligible":false,"has_hsts_header":true,"max_age":31536000,"include_subdomains":true,"note":"Uzbek tilida"}`},
+
+  {id:'observatory', sec:'headers', name:'Mozilla Observatory', icon:'🔭', desc:'HTTP xavfsizlik sarlavhalari',
+   prompt:d=>`Search for Mozilla Observatory HTTP scan results for "${d}" at https://observatory.mozilla.org/analyze/${d} or search "mozilla observatory ${d} grade score". Return ONLY JSON: {"grade":"C","score":50,"passed":7,"failed":4,"total":11,"missing_headers":["Content-Security-Policy","Referrer-Policy"],"note":"Uzbek tilida"}`},
+
+  {id:'secheaders', sec:'headers', name:'Security Headers',    icon:'🔑', desc:'Sarlavhalar batafsil audit',
+   prompt:d=>`Search securityheaders.com for "${d}" at https://securityheaders.com/?q=${d}&followRedirects=on or search "securityheaders ${d} grade missing". Return ONLY JSON: {"grade":"B","missing":["Content-Security-Policy","Permissions-Policy"],"present":["X-Frame-Options","X-Content-Type-Options","Strict-Transport-Security","X-XSS-Protection"],"note":"Uzbek tilida"}`},
+
+  {id:'cspeval',  sec:'headers', name:'CSP Evaluator',        icon:'🧱', desc:'Content Security Policy tekshiruvi',
+   prompt:d=>`Search for Content-Security-Policy header analysis for "${d}". Search "CSP content security policy ${d}" or check https://csp-evaluator.withgoogle.com/. Return ONLY JSON: {"has_csp":false,"has_unsafe_inline":false,"has_unsafe_eval":false,"severity":"high","issues":["No CSP header found"],"note":"Uzbek tilida"}`},
+
+  {id:'hackertarget', sec:'infra', name:'HackerTarget',       icon:'🎯', desc:'Port skaneri va server ma\'lumotlari',
+   prompt:d=>`Fetch https://api.hackertarget.com/httpheaders/?q=${d} and https://api.hackertarget.com/hostsearch/?q=${d} for server details of "${d}". Return ONLY JSON: {"server":"nginx","ip":"1.2.3.4","country":"UZ","open_ports":[],"subdomains":[],"cdn":false,"cloud_provider":"","note":"Uzbek tilida"}`},
+
+  {id:'dnssec',   sec:'infra',   name:'DNSSEC Checker',       icon:'🌍', desc:'DNSSEC va DNS konfiguratsiyasi',
+   prompt:d=>`Search for DNSSEC and DNS security configuration for "${d}". Try https://dnssec-analyzer.verisignlabs.com/${d} or search "DNSSEC ${d} signed delegation". Return ONLY JSON: {"dnssec_enabled":false,"spf_record":true,"dkim_record":false,"dmarc_record":false,"dmarc_policy":"none","mx_records":true,"note":"Uzbek tilida"}`},
+
+  {id:'shodan',   sec:'infra',   name:'Shodan Intelligence',  icon:'👁', desc:'Internet skaneri ma\'lumotlari',
+   prompt:d=>`Search Shodan for "${d}" exposed services. Try https://www.shodan.io/search?query=${d} or search "shodan ${d} open ports services". Return ONLY JSON: {"ports":[],"services":[],"vulns":[],"isp":"","os":"","exposed_services":0,"note":"Uzbek tilida"}`},
+
+  {id:'wappalyzer', sec:'tech',  name:'Wappalyzer (Tech Stack)', icon:'⚙️', desc:'Texnologiyalar va versiyalar',
+   prompt:d=>`Search for web technologies used by "${d}" using Wappalyzer or BuiltWith. Try https://www.wappalyzer.com/lookup/${d}/ or search "wappalyzer ${d} technologies CMS framework". Return ONLY JSON: {"cms":"","server":"","framework":"","languages":[],"analytics":[],"cdn":"","js_framework":"","version_leaks":[],"note":"Uzbek tilida"}`},
+
+  {id:'retire',   sec:'tech',   name:'Retire.js / Vuln Libraries', icon:'📦', desc:'Eskirgan JS kutubxonalar',
+   prompt:d=>`Search for vulnerable or outdated JavaScript libraries on "${d}". Search "retire.js ${d}" or "vulnerable javascript libraries ${d}". Also search for known CVEs related to technologies on that domain. Return ONLY JSON: {"vulnerable_libs":[],"outdated_libs":[],"cve_count":0,"highest_cvss":0,"note":"Uzbek tilida"}`},
+
+  {id:'cve',      sec:'tech',   name:'CVE / NVD Tekshiruvi',  icon:'💀', desc:'Taniqli zaifliklar ma\'lumotlar bazasi',
+   prompt:d=>`Search NVD and CVE databases for vulnerabilities related to technologies used by "${d}". Search "CVE vulnerabilities ${d}" or "NVD cve.mitre.org ${d} cms vulnerability". Return ONLY JSON: {"cves_found":[],"critical":0,"high":0,"medium":0,"patched":true,"note":"Uzbek tilida"}`},
+
+  {id:'wayback',  sec:'tech',   name:'Wayback Machine / Info Leak', icon:'🕰', desc:'Tarixiy sahifalar va ma\'lumot sizishi',
+   prompt:d=>`Search Wayback Machine for "${d}" snapshots that might reveal sensitive info. Try https://web.archive.org/web/*/${d} or search "site:web.archive.org ${d} robots.txt .env backup". Return ONLY JSON: {"snapshots":100,"oldest":"2015","sensitive_files_found":false,"exposed_paths":[],"note":"Uzbek tilida"}`},
+
+  {id:'hibp',     sec:'privacy', name:'HaveIBeenPwned',        icon:'⚠️', desc:'Ma\'lumotlar sizishi',
+   prompt:d=>`Check haveibeenpwned.com for breaches associated with domain "${d}". Search "haveibeenpwned ${d} breach" or https://haveibeenpwned.com/DomainSearch. Return ONLY JSON: {"breached":false,"count":0,"breaches":[],"paste_count":0,"note":"Uzbek tilida"}`},
+
+  {id:'urlscan',  sec:'privacy', name:'urlscan.io',            icon:'🔍', desc:'URL xatti-harakati va trackerlar',
+   prompt:d=>`Search urlscan.io for recent scans of "${d}" at https://urlscan.io/search/#domain:${d}. Return ONLY JSON: {"safe":true,"score":0,"trackers":[],"cookies_set":0,"requests_to_third_party":0,"data_leaks":false,"note":"Uzbek tilida"}`},
+
+  {id:'privacygrade', sec:'privacy', name:'Privacy / GDPR Check', icon:'🔏', desc:'Cookie va GDPR muvofiqlik tekshiruvi',
+   prompt:d=>`Search for privacy and GDPR compliance information for "${d}". Check if they have a privacy policy, cookie consent, GDPR compliance. Search "privacy policy GDPR ${d} cookies consent". Return ONLY JSON: {"has_privacy_policy":true,"has_cookie_banner":false,"gdpr_compliant":false,"collects_personal_data":true,"third_party_trackers":[],"note":"Uzbek tilida"}`},
+];
+
+let results = {};
+let domain = '';
+let done = 0;
+let dotEls = [];
+let vulnItems = [];
+
+function norm(u){
+  try{
+    const s = u.startsWith('http') ? u : 'https://'+u;
+    return new URL(s).hostname;
+  }catch{return u.replace(/^(https?:\/\/)?(www\.)?/,'').split('/')[0];}
+}
+
+function showError(msg){
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 8000);
+}
+
+async function callClaude(prompt){
+  const response = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1200,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      system: 'You are a professional cybersecurity scanner. Use web search to find REAL current security data for the given domain. Return ONLY a raw JSON object, no markdown, no backticks, no explanation whatsoever. Just the JSON.',
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(()=>({error:'Network xatosi'}));
+    throw new Error(err.error?.message || err.error || `HTTP ${response.status}`);
+  }
+
+  const d = await response.json();
+  const txt = (d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+  const m = txt.match(/\{[\s\S]*\}/);
+  if(m){ try{ return JSON.parse(m[0]); }catch{} }
+  return { note: 'Parse xatosi yoki ma\'lumot topilmadi' };
+}
+
+function gradeClass(g){
+  if(!g) return '';
+  const u = g.toUpperCase().replace('+','');
+  if(u==='A') return 'gA';
+  if(u==='B') return 'gB';
+  if(u==='C') return 'gC';
+  return 'gD';
+}
+
+function tick(v){
+  return v===true||v==='clean'||v==='yes'
+    ? '<span class="ok">✓ Ha</span>'
+    : v===false||v==='found'||v==='no'
+    ? '<span class="bad">✗ Yo\'q</span>'
+    : '<span class="dim">—</span>';
+}
+
+function safe(v){ return v===true?'<span class="ok">✓ Xavfsiz</span>':'<span class="bad">✗ Xavfli</span>'; }
+
+function cardBody(svc, d){
+  if(!d) return '<div style="padding:12px 16px;font-size:10px;color:var(--muted)">Ma\'lumot topilmadi</div>';
+  let rows = '';
+
+  if(svc.id==='sucuri'){
+    rows=row('Malware',d.malware==='clean'?'<span class="ok">✓ Yo\'q</span>':'<span class="bad">✗ Topildi</span>')+
+      row('Blacklist',d.blacklist==='clean'?'<span class="ok">✓ Toza</span>':'<span class="bad">✗ Ro\'yxatda</span>')+
+      row('Spam',d.spam==='clean'?'<span class="ok">✓ Yo\'q</span>':'<span class="bad">✗ Bor</span>')+
+      row('Firewall',tick(d.website_firewall))+
+      (d.blacklisted_by&&d.blacklisted_by.length?row('Blacklist manbasi','<span class="bad">'+d.blacklisted_by.join(', ')+'</span>'):'');
+  } else if(svc.id==='virustotal'){
+    rows=row('Holat',d.clean?'<span class="ok">✓ Toza</span>':'<span class="bad">✗ Xavfli</span>')+
+      row('Malicious','<span class="'+(d.malicious>0?'bad':'ok')+'">'+d.malicious+'</span>')+
+      row('Suspicious','<span class="'+(d.suspicious>0?'warn':'ok')+'">'+d.suspicious+'</span>')+
+      row('Harmless','<span class="ok">'+d.harmless+'</span>')+
+      row('Jami antivirus','<span class="neutral">'+d.total+'</span>');
+  } else if(svc.id==='google'){
+    rows=row('Status',safe(d.safe))+
+      (d.threats&&d.threats.length?row('Tahdidlar','<span class="bad">'+d.threats.join(', ')+'</span>'):row('Tahdidlar','<span class="ok">Yo\'q</span>'));
+  } else if(svc.id==='phishtank'){
+    rows=row('Phishing DB',d.in_database?'<span class="bad">✗ Topildi</span>':'<span class="ok">✓ Toza</span>')+
+      (d.phish_id?row('Phish ID','<span class="bad">'+d.phish_id+'</span>'):'')+
+      row('Tasdiqlangan',tick(!d.in_database));
+  } else if(svc.id==='ssllabs'){
+    rows=row('Daraja','<span class="grade-pill '+gradeClass(d.grade)+'">'+d.grade+'</span>')+
+      row('TLS 1.3',tick(d.tls13))+row('TLS 1.2',tick(d.tls12))+
+      row('TLS 1.0/1.1',d.tls10||d.tls11?'<span class="bad">✗ Yoqilgan!</span>':'<span class="ok">✓ O\'chirilgan</span>')+
+      row('Forward Secrecy',tick(d.forward_secrecy))+
+      row('HSTS',tick(d.hsts))+
+      row('Heartbleed',d.heartbleed===false?'<span class="ok">✓ Xavfsiz</span>':'<span class="bad">✗ Zaif!</span>')+
+      row('POODLE',d.poodle===false?'<span class="ok">✓ Xavfsiz</span>':'<span class="bad">✗ Zaif!</span>')+
+      row('Sertifikat muddati','<span class="'+(d.cert_expiry_days>30?'ok':'bad')+'">'+d.cert_expiry_days+' kun</span>');
+  } else if(svc.id==='crtsh'){
+    rows=row('Jami sertifikatlar','<span class="neutral">'+d.total_certs+'</span>')+
+      row('So\'nggi emitent','<span class="neutral">'+(d.latest_issuer||'—')+'</span>')+
+      row('Wildcard sertifikatlar','<span class="'+(d.wildcard_certs>0?'warn':'ok')+'">'+d.wildcard_certs+'</span>')+
+      row('Muddati o\'tgan','<span class="'+(d.expired_certs>0?'bad':'ok')+'">'+d.expired_certs+'</span>')+
+      (d.subdomains_found&&d.subdomains_found.length?row('Subdomenlar','<span class="neutral">'+d.subdomains_found.slice(0,3).join(', ')+'</span>'):'');
+  } else if(svc.id==='hstscheck'){
+    rows=row('HSTS Preload',d.preloaded?'<span class="ok">✓ Ro\'yxatda</span>':'<span class="warn">✗ Yo\'q</span>')+
+      row('HSTS Header',tick(d.has_hsts_header))+
+      row('max-age','<span class="neutral">'+(d.max_age||'—')+'</span>')+
+      row('includeSubdomains',tick(d.include_subdomains));
+  } else if(svc.id==='observatory'){
+    rows=row('Daraja','<span class="grade-pill '+gradeClass(d.grade)+'">'+d.grade+'</span> <span class="dim">'+d.score+'/100</span>')+
+      row('O\'tdi/Yiqildi','<span class="ok">'+d.passed+'</span> / <span class="bad">'+d.failed+'</span>')+
+      (d.missing_headers&&d.missing_headers.length?row('Yo\'q sarlavhalar','<span class="bad">'+d.missing_headers.slice(0,3).join(', ')+'</span>'):'');
+  } else if(svc.id==='secheaders'){
+    rows=row('Daraja','<span class="grade-pill '+gradeClass(d.grade)+'">'+d.grade+'</span>')+
+      (d.missing&&d.missing.length?row('Yo\'q','<span class="bad">'+d.missing.slice(0,3).join(', ')+'</span>'):'')+
+      (d.present&&d.present.length?row('Mavjud','<span class="ok">'+d.present.slice(0,3).join(', ')+'</span>'):'');
+  } else if(svc.id==='cspeval'){
+    rows=row('CSP mavjud',tick(d.has_csp))+
+      row('unsafe-inline',d.has_unsafe_inline?'<span class="bad">✗ Bor!</span>':'<span class="ok">✓ Yo\'q</span>')+
+      row('unsafe-eval',d.has_unsafe_eval?'<span class="bad">✗ Bor!</span>':'<span class="ok">✓ Yo\'q</span>')+
+      (d.issues&&d.issues.length?row('Muammolar','<span class="bad">'+d.issues.slice(0,2).join('; ')+'</span>'):'');
+  } else if(svc.id==='hackertarget'){
+    rows=row('Server','<span class="neutral">'+(d.server||'—')+'</span>')+
+      row('IP','<span class="neutral">'+(d.ip||'—')+'</span>')+
+      row('Mamlakat','<span class="neutral">'+(d.country||'—')+'</span>')+
+      (d.open_ports&&d.open_ports.length?row('Ochiq portlar','<span class="warn">'+d.open_ports.join(', ')+'</span>'):row('Ochiq portlar','<span class="ok">Topilmadi</span>'))+
+      row('CDN',d.cdn?'<span class="ok">✓ Ha</span>':'<span class="neutral">Yo\'q</span>');
+  } else if(svc.id==='dnssec'){
+    rows=row('DNSSEC',tick(d.dnssec_enabled))+
+      row('SPF',tick(d.spf_record))+
+      row('DKIM',tick(d.dkim_record))+
+      row('DMARC',tick(d.dmarc_record))+
+      row('DMARC Policy','<span class="neutral">'+(d.dmarc_policy||'—')+'</span>');
+  } else if(svc.id==='shodan'){
+    rows=row('Ochiq xizmatlar','<span class="'+(d.exposed_services>3?'bad':d.exposed_services>0?'warn':'ok')+'">'+d.exposed_services+'</span>')+
+      (d.ports&&d.ports.length?row('Portlar','<span class="warn">'+d.ports.join(', ')+'</span>'):row('Portlar','<span class="ok">Topilmadi</span>'))+
+      (d.vulns&&d.vulns.length?row('Shodan CVE','<span class="bad">'+d.vulns.slice(0,3).join(', ')+'</span>'):row('CVE','<span class="ok">Topilmadi</span>'))+
+      row('OS','<span class="neutral">'+(d.os||'Nomalum')+'</span>');
+  } else if(svc.id==='wappalyzer'){
+    rows=row('CMS','<span class="neutral">'+(d.cms||'—')+'</span>')+
+      row('Server','<span class="neutral">'+(d.server||'—')+'</span>')+
+      row('JS Framework','<span class="neutral">'+(d.js_framework||'—')+'</span>')+
+      row('CDN','<span class="neutral">'+(d.cdn||'—')+'</span>')+
+      (d.version_leaks&&d.version_leaks.length?row('Versiya sizishi','<span class="bad">'+d.version_leaks.slice(0,3).join(', ')+'</span>'):row('Versiya sizishi','<span class="ok">Topilmadi</span>'));
+  } else if(svc.id==='retire'){
+    rows=row('Zaif kutubxonalar','<span class="'+(d.vulnerable_libs&&d.vulnerable_libs.length>0?'bad':'ok')+'">'+((d.vulnerable_libs&&d.vulnerable_libs.length)||0)+'</span>')+
+      (d.vulnerable_libs&&d.vulnerable_libs.length?row('Topildi','<span class="bad">'+d.vulnerable_libs.slice(0,3).join(', ')+'</span>'):'')+
+      row('CVE soni','<span class="'+(d.cve_count>0?'bad':'ok')+'">'+d.cve_count+'</span>')+
+      row('Eng yuqori CVSS','<span class="'+(d.highest_cvss>=7?'bad':d.highest_cvss>=4?'warn':'ok')+'">'+d.highest_cvss+'</span>');
+  } else if(svc.id==='cve'){
+    rows=row('Kritik CVE','<span class="'+(d.critical>0?'bad':'ok')+'">'+d.critical+'</span>')+
+      row('Yuqori','<span class="'+(d.high>0?'bad':'ok')+'">'+d.high+'</span>')+
+      row('O\'rta','<span class="'+(d.medium>0?'warn':'ok')+'">'+d.medium+'</span>')+
+      (d.cves_found&&d.cves_found.length?row('CVE kodlari','<span class="bad">'+d.cves_found.slice(0,3).join(', ')+'</span>'):row('CVE','<span class="ok">Topilmadi</span>'));
+  } else if(svc.id==='wayback'){
+    rows=row('Snapshot soni','<span class="neutral">'+(d.snapshots||0)+'</span>')+
+      row('Eng qadimiy','<span class="neutral">'+(d.oldest||'—')+'</span>')+
+      row('Maxfiy fayllar',d.sensitive_files_found?'<span class="bad">✗ Topildi!</span>':'<span class="ok">✓ Topilmadi</span>')+
+      (d.exposed_paths&&d.exposed_paths.length?row('Ochiq yo\'llar','<span class="bad">'+d.exposed_paths.slice(0,3).join(', ')+'</span>'):'');
+  } else if(svc.id==='hibp'){
+    rows=row('Breach holati',!d.breached?'<span class="ok">✓ Topilmadi</span>':'<span class="bad">✗ '+d.count+' ta breach!</span>')+
+      row('Paste soni','<span class="'+(d.paste_count>0?'warn':'ok')+'">'+d.paste_count+'</span>')+
+      (d.breaches&&d.breaches.length?row('Breachlar','<span class="bad">'+d.breaches.slice(0,3).join(', ')+'</span>'):'');
+  } else if(svc.id==='urlscan'){
+    rows=row('Holat',safe(d.safe))+
+      row('Tracker soni','<span class="'+(d.trackers&&d.trackers.length>0?'warn':'ok')+'">'+(d.trackers&&d.trackers.length||0)+'</span>')+
+      row('3. tomon so\'rov','<span class="neutral">'+d.requests_to_third_party+'</span>')+
+      row('Ma\'lumot sizishi',d.data_leaks?'<span class="bad">✗ Bor!</span>':'<span class="ok">✓ Yo\'q</span>');
+  } else if(svc.id==='privacygrade'){
+    rows=row('Privacy Policy',tick(d.has_privacy_policy))+
+      row('Cookie banner',tick(d.has_cookie_banner))+
+      row('GDPR muvofiq',tick(d.gdpr_compliant))+
+      (d.third_party_trackers&&d.third_party_trackers.length?row('Trackerlar','<span class="warn">'+d.third_party_trackers.slice(0,3).join(', ')+'</span>'):row('Trackerlar','<span class="ok">Topilmadi</span>'));
+  }
+
+  return `<div class="card-rows">${rows}</div>${d.note?`<div class="card-note">"${d.note}"</div>`:''}`;
+}
+
+function row(k,v){ return `<div class="row"><span class="row-key">${k}</span><span class="row-val">${v}</span></div>`; }
+
+function cardState(svc, d){
+  if(!d) return 'warn';
+  if(svc.id==='sucuri') return (d.malware==='clean'&&d.blacklist==='clean')? 'ok':'bad';
+  if(svc.id==='virustotal') return d.clean?'ok':d.malicious>0?'bad':'warn';
+  if(svc.id==='google') return d.safe?'ok':'bad';
+  if(svc.id==='phishtank') return !d.in_database?'ok':'bad';
+  if(svc.id==='ssllabs') return ['A+','A'].includes(d.grade)?'ok':['D','F'].includes(d.grade)?'bad':'warn';
+  if(svc.id==='crtsh') return d.expired_certs>0?'warn':'ok';
+  if(svc.id==='hstscheck') return d.has_hsts_header?'ok':'warn';
+  if(svc.id==='observatory') return ['A+','A'].includes(d.grade)?'ok':['D','F'].includes(d.grade)?'bad':'warn';
+  if(svc.id==='secheaders') return ['A+','A'].includes(d.grade)?'ok':['D','F'].includes(d.grade)?'bad':'warn';
+  if(svc.id==='cspeval') return d.has_csp?'ok':'bad';
+  if(svc.id==='hackertarget') return d.open_ports&&d.open_ports.length>5?'warn':'ok';
+  if(svc.id==='dnssec') return d.dnssec_enabled?'ok':'warn';
+  if(svc.id==='shodan') return d.exposed_services>5?'bad':d.exposed_services>2?'warn':'ok';
+  if(svc.id==='wappalyzer') return d.version_leaks&&d.version_leaks.length?'warn':'ok';
+  if(svc.id==='retire') return d.vulnerable_libs&&d.vulnerable_libs.length?'bad':'ok';
+  if(svc.id==='cve') return d.critical>0?'bad':d.high>0?'warn':'ok';
+  if(svc.id==='wayback') return d.sensitive_files_found?'bad':'ok';
+  if(svc.id==='hibp') return !d.breached?'ok':'bad';
+  if(svc.id==='urlscan') return d.safe?'ok':'bad';
+  if(svc.id==='privacygrade') return d.gdpr_compliant?'ok':'warn';
+  return 'ok';
+}
+
+function buildCards(){
+  const secs={malware:'sec-malware',ssl:'sec-ssl',headers:'sec-headers',infra:'sec-infra',tech:'sec-tech',privacy:'sec-privacy'};
+  Object.values(secs).forEach(id=>document.getElementById(id).innerHTML='');
+  SERVICES.forEach(svc=>{
+    const el=document.createElement('div');
+    el.className='card state-loading';
+    el.id='card-'+svc.id;
+    el.innerHTML=`
+      <div class="card-top">
+        <div class="card-emoji">${svc.icon}</div>
+        <div class="card-info">
+          <div class="card-title">${svc.name}</div>
+          <div class="card-desc">${svc.desc}</div>
+        </div>
+        <span class="card-badge badge-loading" id="badge-${svc.id}">
+          <span class="spin"></span>
+        </span>
+      </div>
+      <div id="body-${svc.id}"></div>`;
+    document.getElementById(secs[svc.sec]).appendChild(el);
+  });
+  document.getElementById('mainCards').style.display='block';
+}
+
+function updateCard(svc, state, d){
+  const card=document.getElementById('card-'+svc.id);
+  const badge=document.getElementById('badge-'+svc.id);
+  const body=document.getElementById('body-'+svc.id);
+  if(!card) return;
+  if(state==='loading'){
+    card.className='card state-loading';
+    badge.className='card-badge badge-loading';
+    badge.innerHTML='<span class="spin"></span>';
+    return;
+  }
+  const cs=cardState(svc,d);
+  card.className='card state-'+cs;
+  const labels={ok:'✓ TOZA',warn:'⚠ TEKSHIR',bad:'✗ MUAMMO'};
+  badge.className='card-badge badge-'+cs;
+  badge.textContent=labels[cs];
+  body.innerHTML=cardBody(svc,d);
+}
+
+function extractVulns(){
+  vulnItems=[];
+  SERVICES.forEach(svc=>{
+    const d=results[svc.id];
+    if(!d) return;
+    const cs=cardState(svc,d);
+    if(cs==='bad'){
+      let title='',detail='';
+      if(svc.id==='sucuri'&&d.malware!=='clean'){title='Malware aniqlandi (Sucuri)';detail='Sucuri SiteCheck saytda zararli kod yoki virus borligini aniqladi.';}
+      if(svc.id==='virustotal'&&!d.clean){title='Antivirus ogohlantirishi (VirusTotal)';detail=d.malicious+' ta antivirus saytni xavfli deb belgiladi.';}
+      if(svc.id==='google'&&!d.safe){title='Google Safe Browsing ogohlantirishi';detail='Google saytni xavfli ro\'yxatga kiritgan.';}
+      if(svc.id==='phishtank'&&d.in_database){title='Phishing URL (PhishTank)';detail='Sayt phishing ma\'lumotlar bazasida topildi.';}
+      if(svc.id==='ssllabs'&&['D','F'].includes(d.grade)){title='Zaif SSL/TLS konfiguratsiyasi';detail='SSL Labs bahosi: '+d.grade+'.';}
+      if(svc.id==='cspeval'&&!d.has_csp){title='CSP sarlavhasi yo\'q';detail='XSS hujumlaridan himoya yo\'q.';}
+      if(svc.id==='retire'&&d.vulnerable_libs&&d.vulnerable_libs.length){title='Zaif JS kutubxonalari';detail='Topildi: '+d.vulnerable_libs.join(', ');}
+      if(svc.id==='hibp'&&d.breached){title='Ma\'lumotlar sizishi (HIBP)';detail=d.count+' ta breach: '+d.breaches.join(', ');}
+      if(svc.id==='urlscan'&&!d.safe){title='Xavfli URL (urlscan.io)';detail='urlscan.io tekshiruvi xavfli deb aniqladi.';}
+      if(svc.id==='wayback'&&d.sensitive_files_found){title='Maxfiy fayllar ochiq';detail='Arxivda maxfiy fayllar topildi: '+d.exposed_paths.join(', ');}
+      if(svc.id==='cve'&&d.critical>0){title='Kritik CVE zaifliklar';detail='Kritik: '+d.critical+', Yuqori: '+d.high+'.';}
+      if(svc.id==='shodan'&&d.exposed_services>5){title='Ko\'p ochiq xizmatlar (Shodan)';detail=d.exposed_services+' xizmat ochiq.';}
+      if(title) vulnItems.push({sev:'crit',title,detail});
+    } else if(cs==='warn'){
+      let title='',detail='';
+      if(svc.id==='dnssec'&&!d.dnssec_enabled){title='DNSSEC o\'chirilgan';detail='DNS spoofing hujumlariga qarshi himoya yo\'q.';}
+      if(svc.id==='observatory'&&['C','D','F'].includes(d.grade)){title='Zaif HTTP sarlavhalar';detail='Observatory bahosi: '+d.grade+'.';}
+      if(svc.id==='secheaders'&&['C','D','F'].includes(d.grade)){title='Sarlavhalar tekshiruvi';detail='Daraja: '+d.grade+'. Kerak: '+d.missing.join(', ');}
+      if(svc.id==='hstscheck'&&!d.has_hsts_header){title='HSTS sarlavhasi yo\'q';detail='SSL stripping hujumlariga qarshi himoya yo\'q.';}
+      if(svc.id==='privacygrade'&&!d.gdpr_compliant){title='GDPR muvofiq emas';detail='Privacy policy yoki cookie banner to\'liq emas.';}
+      if(title) vulnItems.push({sev:'high',title,detail});
+    }
+  });
+
+  if(vulnItems.length===0){
+    vulnItems.push({sev:'info',title:'Asosiy tekshiruvlardan o\'tdi',detail:'Avtomatik tekshiruv jiddiy muammolarni aniqlamadi.'});
+  }
+
+  const section=document.getElementById('vulnSection');
+  const list=document.getElementById('vulnList');
+  const count=document.getElementById('vulnCount');
+  const crits=vulnItems.filter(v=>v.sev==='crit').length;
+  const highs=vulnItems.filter(v=>v.sev==='high').length;
+  count.textContent=crits+' kritik, '+highs+' ogohlantirish';
+  list.innerHTML=vulnItems.map(v=>`
+    <div class="vuln-item ${v.sev}">
+      <span class="vuln-sev sev-${v.sev}">${v.sev==='crit'?'KRITIK':v.sev==='high'?'YUQORI':'MA\'LUMOT'}</span>
+      <div class="vuln-body">
+        <div class="vuln-title">${v.title}</div>
+        <div class="vuln-detail">${v.detail}</div>
+      </div>
+    </div>`).join('');
+  section.classList.add('show');
+}
+
+function updateSummary(){
+  let bad=0,warn=0,ok=0;
+  SERVICES.forEach(svc=>{
+    const cs=cardState(svc,results[svc.id]);
+    if(cs==='bad') bad++;
+    else if(cs==='warn') warn++;
+    else ok++;
+  });
+  const total=SERVICES.length;
+  const score=Math.round((ok*100+warn*50)/total);
+  const el=document.getElementById('summaryBar');
+  el.classList.add('show');
+  if(bad===0&&warn<=2){
+    el.className='summary-bar show ok';
+    document.getElementById('sumIcon').textContent='🟢';
+    document.getElementById('sumText').innerHTML=`<strong>${domain}</strong> — asosiy tekshiruvlardan o'tdi. ${ok} toza, ${warn} ogohlantirish.`;
+  } else if(bad>3){
+    el.className='summary-bar show bad';
+    document.getElementById('sumIcon').textContent='🔴';
+    document.getElementById('sumText').innerHTML=`<strong>${domain}</strong> — ${bad} ta jiddiy muammo aniqlandi!`;
+  } else {
+    el.className='summary-bar show warn';
+    document.getElementById('sumIcon').textContent='🟡';
+    document.getElementById('sumText').innerHTML=`<strong>${domain}</strong> — ${bad} muammo, ${warn} ogohlantirish topildi.`;
+  }
+  document.getElementById('sumScore').textContent=score+'%';
+  extractVulns();
+  generateReport(bad,warn,ok,score);
+}
+
+function generateReport(bad,warn,ok,score){
+  const now=new Date().toLocaleString('uz-UZ');
+  const R=results;
+  const lines=[
+    `╔${'═'.repeat(58)}╗`,
+    `║  CYBERSCAN PRO — TO'LIQ XAVFSIZLIK AUDIT HISOBOTI       ║`,
+    `╚${'═'.repeat(58)}╝`,
+    ``,`  Domen      : ${domain}`,`  Sana       : ${now}`,
+    `  Umumiy ball: ${score}/100`,`  Modullar   : 20 ta`,
+    `  Muammolar  : ${bad} kritik | ${warn} ogohlantirish | ${ok} toza`,``,
+    `${'─'.repeat(60)}`,`  MALWARE & BLACKLIST`,`${'─'.repeat(60)}`,``,
+    `  🛡 SUCURI: Malware ${R.sucuri?.malware==='clean'?'✅':'❌'} | Blacklist ${R.sucuri?.blacklist==='clean'?'✅':'❌'} | Spam ${R.sucuri?.spam==='clean'?'✅':'❌'}`,
+    `     ${R.sucuri?.note||''}`,``,
+    `  🦠 VIRUSTOTAL: ${R.virustotal?.clean?'✅ Toza':'❌ Xavfli'} — ${R.virustotal?.malicious||0}/${R.virustotal?.total||90} xavfli`,
+    `     ${R.virustotal?.note||''}`,``,
+    `  🌐 GOOGLE: ${R.google?.safe?'✅ Xavfsiz':'❌ Blacklist'}`,`     ${R.google?.note||''}`,``,
+    `  🎣 PHISHTANK: ${!R.phishtank?.in_database?'✅ Toza':'❌ Topildi'}`,`     ${R.phishtank?.note||''}`,``,
+    `${'─'.repeat(60)}`,`  SSL / TLS`,`${'─'.repeat(60)}`,``,
+    `  🔒 SSL LABS: ${R.ssllabs?.grade||'?'} | TLS1.3: ${R.ssllabs?.tls13?'✅':'❌'} | HSTS: ${R.ssllabs?.hsts?'✅':'❌'} | ${R.ssllabs?.cert_expiry_days||'?'} kun`,
+    `     ${R.ssllabs?.note||''}`,``,
+    `  📜 CRT.SH: ${R.crtsh?.total_certs||'?'} sertifikat | Emitent: ${R.crtsh?.latest_issuer||'?'}`,`     ${R.crtsh?.note||''}`,``,
+    `  🔐 HSTS PRELOAD: ${R.hstscheck?.preloaded?'✅':'❌'} | Header: ${R.hstscheck?.has_hsts_header?'✅':'❌'}`,`     ${R.hstscheck?.note||''}`,``,
+    `${'─'.repeat(60)}`,`  HTTP SARLAVHALAR`,`${'─'.repeat(60)}`,``,
+    `  🔭 OBSERVATORY: ${R.observatory?.grade||'?'} (${R.observatory?.score||'?'}/100)`,`     ${R.observatory?.note||''}`,``,
+    `  🔑 SECHEADERS: ${R.secheaders?.grade||'?'}`,`     ${R.secheaders?.note||''}`,``,
+    `  🧱 CSP: ${R.cspeval?.has_csp?'✅ Bor':'❌ Yo\'q'}`,`     ${R.cspeval?.note||''}`,``,
+    `${'─'.repeat(60)}`,`  DNS & INFRATUZILMA`,`${'─'.repeat(60)}`,``,
+    `  🎯 HACKERTARGET: Server ${R.hackertarget?.server||'—'} | IP ${R.hackertarget?.ip||'—'}`,`     ${R.hackertarget?.note||''}`,``,
+    `  🌍 DNSSEC: ${R.dnssec?.dnssec_enabled?'✅':'❌'} | SPF: ${R.dnssec?.spf_record?'✅':'❌'} | DKIM: ${R.dnssec?.dkim_record?'✅':'❌'} | DMARC: ${R.dnssec?.dmarc_record?'✅':'❌'}`,
+    `     ${R.dnssec?.note||''}`,``,
+    `  👁 SHODAN: ${R.shodan?.exposed_services||0} ochiq xizmat`,`     ${R.shodan?.note||''}`,``,
+    `${'─'.repeat(60)}`,`  TEXNOLOGIYA & CVE`,`${'─'.repeat(60)}`,``,
+    `  ⚙️  WAPPALYZER: CMS ${R.wappalyzer?.cms||'—'} | Server ${R.wappalyzer?.server||'—'}`,`     ${R.wappalyzer?.note||''}`,``,
+    `  📦 RETIRE.JS: ${R.retire?.vulnerable_libs?.length||0} zaif lib | CVE: ${R.retire?.cve_count||0}`,`     ${R.retire?.note||''}`,``,
+    `  💀 CVE: Kritik ${R.cve?.critical||0} | Yuqori ${R.cve?.high||0} | O'rta ${R.cve?.medium||0}`,`     ${R.cve?.note||''}`,``,
+    `  🕰 WAYBACK: ${R.wayback?.snapshots||0} snapshot | Maxfiy: ${R.wayback?.sensitive_files_found?'❌ Topildi':'✅ Yo\'q'}`,`     ${R.wayback?.note||''}`,``,
+    `${'─'.repeat(60)}`,`  PRIVACY & DATA`,`${'─'.repeat(60)}`,``,
+    `  ⚠️  HIBP: ${!R.hibp?.breached?'✅ Toza':'❌ '+R.hibp?.count+' breach'}`,`     ${R.hibp?.note||''}`,``,
+    `  🔍 URLSCAN: ${R.urlscan?.safe?'✅ Xavfsiz':'❌ Xavfli'}`,`     ${R.urlscan?.note||''}`,``,
+    `  🔏 GDPR: Privacy ${R.privacygrade?.has_privacy_policy?'✅':'❌'} | Cookie ${R.privacygrade?.has_cookie_banner?'✅':'❌'}`,`     ${R.privacygrade?.note||''}`,``,
+    `${'═'.repeat(60)}`,`  XULOSA: Ball ${score}/100 | Kritik: ${bad} | Ogohlantirish: ${warn} | Toza: ${ok}`,`${'═'.repeat(60)}`,``,
+    ...vulnItems.filter(v=>v.sev==='crit').map(v=>`  ❌ KRITIK: ${v.title}`),
+    ...vulnItems.filter(v=>v.sev==='high').map(v=>`  ⚠️  YUQORI: ${v.title}`),``,
+    `  #cybersecurity #webaudit #cyberscan`,
+  ];
+  document.getElementById('reportBox').textContent=lines.join('\n');
+  document.getElementById('reportWrap').classList.add('show');
+}
+
+function buildExtLinks(){
+  const urls=[
+    ['Sucuri',`https://sitecheck.sucuri.net/results/${domain}`],
+    ['Observatory',`https://observatory.mozilla.org/analyze/${domain}`],
+    ['SSL Labs',`https://www.ssllabs.com/ssltest/analyze.html?d=${domain}`],
+    ['VirusTotal',`https://www.virustotal.com/gui/domain/${domain}`],
+    ['urlscan.io',`https://urlscan.io/search/#domain:${domain}`],
+    ['Safe Browsing',`https://transparencyreport.google.com/safe-browsing/search?url=${domain}`],
+    ['HackerTarget',`https://hackertarget.com/website-security-scan/?q=${domain}`],
+    ['SecurityHeaders',`https://securityheaders.com/?q=${domain}`],
+    ['HIBP Domain',`https://haveibeenpwned.com/DomainSearch`],
+    ['crt.sh',`https://crt.sh/?q=${domain}`],
+    ['HSTS Preload',`https://hstspreload.org/?domain=${domain}`],
+    ['Shodan',`https://www.shodan.io/search?query=${domain}`],
+    ['Wappalyzer',`https://www.wappalyzer.com/lookup/${domain}/`],
+    ['Wayback',`https://web.archive.org/web/*/${domain}`],
+    ['PhishTank',`https://www.phishtank.com/check_phish.php?url=${domain}`],
+    ['DNSSEC',`https://dnssec-analyzer.verisignlabs.com/${domain}`],
+  ];
+  const el=document.getElementById('extLinks');
+  el.innerHTML='<span style="font-size:10px;color:var(--muted);align-self:center;letter-spacing:1px">QO\'LDA TEKSHIR →</span>'+
+    urls.map(([n,u])=>`<a href="${u}" target="_blank">${n} ↗</a>`).join('');
+  el.style.display='flex';
+}
+
+function updateProgress(){
+  done++;
+  const pct=done/SERVICES.length*100;
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progText').textContent=done+' / '+SERVICES.length+' modul';
+  if(dotEls[done-1]) dotEls[done-1].className='prog-dot ok';
+}
+
+async function startScan(){
+  const raw=document.getElementById('urlInput').value.trim();
+  if(!raw) return;
+  domain=norm(raw);
+  results={};done=0;vulnItems=[];
+
+  document.getElementById('scanBtn').disabled=true;
+  document.getElementById('scanBtn').textContent='SCANNING...';
+  document.getElementById('progDomain').textContent=domain;
+  document.getElementById('progWrap').classList.add('show');
+  document.getElementById('progBar').style.width='0';
+  document.getElementById('progText').textContent='0 / '+SERVICES.length+' modul';
+  document.getElementById('summaryBar').className='summary-bar';
+  document.getElementById('vulnSection').className='vuln-section';
+  document.getElementById('reportWrap').className='report-wrap';
+  document.getElementById('errorBanner').classList.remove('show');
+
+  const dotsEl=document.getElementById('progDots');
+  dotsEl.innerHTML='';dotEls=[];
+  SERVICES.forEach(()=>{
+    const d=document.createElement('div');
+    d.className='prog-dot';
+    dotsEl.appendChild(d);
+    dotEls.push(d);
+  });
+
+  buildCards();
+  buildExtLinks();
+  SERVICES.forEach(svc=>updateCard(svc,'loading',null));
+
+  await Promise.all(SERVICES.map(async (svc,i)=>{
+    if(dotEls[i]) dotEls[i].className='prog-dot running';
+    try{
+      const d=await callClaude(svc.prompt(domain));
+      results[svc.id]=d;
+      updateCard(svc,'done',d);
+      if(dotEls[i]) dotEls[i].className='prog-dot ok';
+    }catch(e){
+      results[svc.id]={note:'Xato: '+e.message};
+      updateCard(svc,'done',results[svc.id]);
+      if(dotEls[i]) dotEls[i].className='prog-dot bad';
+      if(e.message.includes('API key')) showError('⚠️ API kaliti sozlanmagan. Vercel dashboard → Settings → Environment Variables → ANTHROPIC_API_KEY qo\'shing.');
+    }
+    updateProgress();
+    if(done===SERVICES.length) updateSummary();
+  }));
+
+  document.getElementById('scanBtn').disabled=false;
+  document.getElementById('scanBtn').textContent='▶ SCAN';
+}
+
+function copyReport(){
+  const t=document.getElementById('reportBox').textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=document.querySelectorAll('.report-btn')[0];
+    b.textContent='✓ Nusxa olindi!';
+    setTimeout(()=>b.textContent='📋 Nusxa olish',2000);
+  });
+}
+
+function downloadReport(){
+  const t=document.getElementById('reportBox').textContent;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+  a.download=`security-audit-${domain}-${Date.now()}.txt`;
+  a.click();
+}
+
+function copyTelegram(){
+  const R=results;
+  const score=document.getElementById('sumScore').textContent;
+  const bad=vulnItems.filter(v=>v.sev==='crit').length;
+  const t=[
+    `🔐 <b>${domain}</b> — Xavfsizlik Audit`,``,
+    `📊 Umumiy ball: <b>${score}</b>`,``,
+    `🦠 VirusTotal: ${R.virustotal?.clean?'✅ Toza':'❌ Xavfli'} (${R.virustotal?.malicious||0}/${R.virustotal?.total||90})`,
+    `🛡 Sucuri: ${R.sucuri?.malware==='clean'?'✅ Toza':'❌ Muammo'}`,
+    `🌐 Google: ${R.google?.safe?'✅ Xavfsiz':'❌ Blacklist'}`,
+    `🔒 SSL: ${R.ssllabs?.grade||'?'} daraja`,
+    `🔭 Observatory: ${R.observatory?.grade||'?'} (${R.observatory?.score||'?'}/100)`,
+    `🔑 Headers: ${R.secheaders?.grade||'?'}`,
+    `🧱 CSP: ${R.cspeval?.has_csp?'✅ Bor':'❌ Yo\'q'}`,
+    `🌍 DNSSEC: ${R.dnssec?.dnssec_enabled?'✅':'❌'} | SPF: ${R.dnssec?.spf_record?'✅':'❌'} | DMARC: ${R.dnssec?.dmarc_record?'✅':'❌'}`,
+    `⚠️ HIBP: ${!R.hibp?.breached?'✅ Toza':'❌ '+R.hibp?.count+' breach'}`,``,
+    bad>0?`❌ ${bad} ta kritik muammo aniqlandi!`:`✅ Jiddiy muammo topilmadi`,``,
+    `#security #webaudit #cyberscan`,
+  ].join('\n');
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=document.querySelectorAll('.report-btn')[2];
+    b.textContent='✓ Nusxa olindi!';
+    setTimeout(()=>b.textContent='✈ Telegram post',2000);
+  });
+}
+
+document.getElementById('urlInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!document.getElementById('scanBtn').disabled) startScan();
+});
+</script>
+</body>
+</html>
